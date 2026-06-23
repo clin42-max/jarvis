@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: http://localhost:* ws://localhost:*">
+  <title>JARVIS - AI Voice Assistant</title>
+  <link rel="stylesheet" href="./styles/jarvis.css">
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  <canvas id="particleCanvas" class="particle-canvas"></canvas>
+  <div class="neural-network" id="neuralNetwork"></div>
+
+  <!-- Title bar for frameless window -->
+  <div class="titlebar" id="titlebar">
+  <span class="titlebar-title">JARVIS</span>
+  <div class="titlebar-controls">
+    <button class="titlebar-btn" id="btnMinimize" title="Minimize">─</button>
+    <button class="titlebar-btn" id="btnHide" title="Hide">▼</button>
+    <button class="titlebar-btn close" id="btnClose" title="Close">✕</button>
+  </div>
+  </div>
+
+  <div class="voice-activation-status" id="voiceStatus">
+    <div class="status-indicator"></div>
+    <span>Voice: OFF</span>
+  </div>
+
+  <!-- Navigation tabs -->
+  <nav class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-view="main">◉ Core</button>
+    <button class="nav-tab" data-view="dashboard">◈ Dashboard</button>
+    <button class="nav-tab" data-view="automation">⚡ Automate</button>
+    <button class="nav-tab" data-view="settings">⚙ Settings</button>
+  </nav>
+
+  <!-- MAIN VIEW -->
+  <div class="view active" id="viewMain">
+    <div class="container" id="mainContainer">
+      <div class="header">
+        <h1>JARVIS</h1>
+        <p>Just A Rather Very Intelligent System</p>
+      </div>
+
+      <div class="assistant-avatar">
+        <div class="orbit-ring"></div>
+        <div class="orbit-ring"></div>
+        <div class="avatar-circle" id="avatar">
+          <div class="avatar-core" id="avatarCore"></div>
+          <div class="thinking-rings" id="thinkingRings"></div>
+        </div>
+        <div class="wave-animation"></div>
+        <div class="wave-animation"></div>
+        <div class="wave-animation"></div>
+      </div>
+
+      <!-- Voice visualizer -->
+      <div class="voice-visualizer" id="voiceVisualizer">
+        <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+        <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+        <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+        <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+      </div>
+
+      <div class="status">
+        <div class="status-text" id="status">Initializing JARVIS...</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="startBtn"><span>▶</span> <span>Activate</span></button>
+        <button class="btn" id="voiceActivationBtn"><span>🎯</span> <span>Voice</span></button>
+        <button class="btn" id="minimizeBtn"><span>⬇</span> <span>Hide</span></button>
+        <button class="btn" id="orbBtn"><span>◉</span> <span>Orb</span></button>
+        <button class="btn" id="stealthBtn"><span>👁</span> <span>Stealth</span></button>
+        <button class="btn" id="widgetBtn"><span>▣</span> <span>Widget</span></button>
+      </div>
+
+      <div class="transcript" id="transcript">
+        <div class="transcript-placeholder">Awaiting your command, sir...</div>
+      </div>
+
+      <div class="commands-toggle" id="commandsToggle">
+        <h3><span>⚡ COMMANDS (200+)</span><span id="toggleIcon">▼</span></h3>
+        <div class="commands-list" id="commandsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div class="view" id="viewDashboard">
+    <div class="dashboard-grid">
+      <div class="hud-panel glass">
+        <h3 class="panel-title">◈ AI Status</h3>
+        <div class="stat-row"><span>Provider</span><span id="dashAIProvider">—</span></div>
+        <div class="stat-row"><span>Model</span><span id="dashAIModel">—</span></div>
+        <div class="stat-row"><span>Status</span><span id="dashAIStatus" class="status-badge idle">Idle</span></div>
+        <div class="stat-row"><span>Response</span><span id="dashAIResponse">—</span></div>
+        <div class="progress-bar"><div class="progress-fill ai" id="dashAIProgress" style="width:0%"></div></div>
+      </div>
+
+      <div class="hud-panel glass">
+        <h3 class="panel-title">◈ System Monitor</h3>
+        <div class="stat-row"><span>CPU</span><span id="dashCPU">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill cpu" id="dashCPUBar" style="width:0%"></div></div>
+        <div class="stat-row"><span>RAM</span><span id="dashRAM">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill ram" id="dashRAMBar" style="width:0%"></div></div>
+        <div class="stat-row"><span>Disk</span><span id="dashDisk">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill disk" id="dashDiskBar" style="width:0%"></div></div>
+        <div class="stat-row"><span>Battery</span><span id="dashBattery">—</span></div>
+        <div class="stat-row"><span>Network</span><span id="dashNetwork">—</span></div>
+      </div>
+
+      <div class="hud-panel glass">
+        <h3 class="panel-title">◈ Assistant</h3>
+        <div class="stat-row"><span>Listening</span><span id="dashListening" class="status-badge">Off</span></div>
+        <div class="stat-row"><span>Wake Word</span><span id="dashWakeWord" class="status-badge">Off</span></div>
+        <div class="stat-row"><span>Voice</span><span id="dashVoice" class="status-badge">Off</span></div>
+        <div class="stat-row"><span>Tasks</span><span id="dashTasks">0</span></div>
+        <div class="stat-row"><span>Automations</span><span id="dashAutomations">0</span></div>
+      </div>
+
+      <div class="hud-panel glass wide">
+        <h3 class="panel-title">◈ Running Applications</h3>
+        <div class="process-list" id="processList"><div class="process-item">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTOMATION VIEW -->
+  <div class="view" id="viewAutomation">
+    <div class="container glass">
+      <h2 class="section-title">⚡ Automation Workflows</h2>
+      <div class="workflow-list" id="workflowList"></div>
+      <button class="btn full-width" id="addWorkflowBtn">+ Create Workflow</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS VIEW -->
+  <div class="view" id="viewSettings">
+    <div class="container glass settings-container">
+      <h2 class="section-title">⚙ Settings</h2>
+
+      <div class="settings-section">
+        <h3>AI Provider</h3>
+        <select id="settingsProvider" class="settings-input">
+          <option value="anthropic">Anthropic Claude</option>
+          <option value="openai">OpenAI</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="grok">Grok</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="perplexity">Perplexity</option>
+          <option value="mistral">Mistral</option>
+          <option value="ollama">Ollama (Local)</option>
+          <option value="lmstudio">LM Studio (Local)</option>
+          <option value="custom">Custom API</option>
+        </select>
+        <input type="password" id="settingsApiKey" class="settings-input" placeholder="API Key">
+        <input type="text" id="settingsModel" class="settings-input" placeholder="Model name">
+        <button class="btn" id="saveAISettings">Save AI Settings</button>
+      </div>
+
+      <div class="settings-section">
+        <h3>Task Model Assignment</h3>
+        <div class="task-models">
+          <label>Reasoning: <input type="text" id="modelReasoning" class="settings-input small" placeholder="claude-sonnet-4-20250514"></label>
+          <label>Coding: <input type="text" id="modelCoding" class="settings-input small" placeholder="gpt-4o"></label>
+          <label>Research: <input type="text" id="modelResearch" class="settings-input small" placeholder="gemini-2.0-flash"></label>
+          <label>Automation: <input type="text" id="modelAutomation" class="settings-input small" placeholder="deepseek-chat"></label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Voice</h3>
+        <label class="checkbox-label"><input type="checkbox" id="voiceEnabled"> Voice Enabled</label>
+        <select id="voiceMode" class="settings-input">
+          <option value="wake-word">Wake Word</option>
+          <option value="continuous">Continuous</option>
+          <option value="push-to-talk">Push to Talk</option>
+        </select>
+        <input type="text" id="wakeWords" class="settings-input" placeholder="Wake words (comma separated)">
+        <button class="btn" id="saveVoiceSettings">Save Voice Settings</button>
+      </div>
+
+      <div class="settings-section">
+        <h3>Theme</h3>
+        <select id="settingsTheme" class="settings-input">
+          <option value="jarvis">Jarvis (Default)</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="cyberpunk">Cyberpunk</option>
+          <option value="holographic">Holographic</option>
+        </select>
+      </div>
+
+      <div class="settings-section">
+        <h3>Hotkeys</h3>
+        <label>Show/Hide: <input type="text" id="hotkeyShowHide" class="settings-input small" value="Ctrl+Shift+J"></label>
+      </div>
+
+      <div class="settings-section">
+        <h3>Plugins</h3>
+        <div class="plugin-list" id="pluginList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="minimize-btn" id="floatingBtn">
+    <div class="icon">◉</div>
+    <div class="text">Jarvis</div>
+  </div>
+
+  <script type="module" src="./scripts/app.ts"></script>
+</body>
+</html>
